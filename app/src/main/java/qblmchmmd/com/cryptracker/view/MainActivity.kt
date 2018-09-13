@@ -1,7 +1,8 @@
-package qblmchmmd.com.cryptracker
+package qblmchmmd.com.cryptracker.view
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import qblmchmmd.com.cryptracker.R
 
 class MainActivity : AppCompatActivity() {
 

@@ -39,5 +39,13 @@ dependencies {
     testImplementation "android.arch.core:core-testing:$lifecycle_version"
     testImplementation "org.mockito:mockito-core:2.22.0"
 
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.22.5"
+
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+}
+kotlin {
+    experimental {
+        coroutines "enable"
+    }
 }

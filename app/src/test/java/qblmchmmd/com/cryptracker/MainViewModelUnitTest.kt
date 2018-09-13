@@ -7,6 +7,7 @@ import com.koc.countrinfo.util.LiveDataTestUtil
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import qblmchmmd.com.cryptracker.viewmodel.MainViewModel
 
 class MainViewModelUnitTest {
     @get:Rule
