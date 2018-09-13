@@ -3,7 +3,7 @@ package qblmchmmd.com.cryptracker.model
 import com.google.gson.annotations.SerializedName
 
 
-data class CryptoListingResponse(
+data class CryptoListResponse(
         @SerializedName("status") val status: Status?,
         @SerializedName("data") val data: List<Data?>?
 ) {
