@@ -13,9 +13,9 @@ data class CryptoListResponse(
             @SerializedName("name") val name: String?, // Cardano
             @SerializedName("symbol") val symbol: String?, // ADA
             @SerializedName("slug") val slug: String?, // cardano
-            @SerializedName("circulating_supply") val circulatingSupply: Long?, // 25927070538
-            @SerializedName("total_supply") val totalSupply: Long?, // 31112483745
-            @SerializedName("max_supply") val maxSupply: Long?, // 45000000000
+            @SerializedName("circulating_supply") val circulatingSupply: Double?, // 25927070538
+            @SerializedName("total_supply") val totalSupply: Double?, // 31112483745
+            @SerializedName("max_supply") val maxSupply: Double?, // 45000000000
             @SerializedName("date_added") val dateAdded: String?, // 2017-10-01T00:00:00.000Z
             @SerializedName("num_market_pairs") val numMarketPairs: Int?, // 47
             @SerializedName("cmc_rank") val cmcRank: Int?, // 10
