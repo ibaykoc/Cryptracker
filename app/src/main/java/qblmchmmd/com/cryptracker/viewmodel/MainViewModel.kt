@@ -36,7 +36,7 @@ class MainViewModel(private val repository: Repository<CryptoListResponse>,
         GlobalScope.launch(mainThread){
             loading.value = true
             try {
-                data.value = withContext(bgThread) { repository.getData().toString() }
+                data.value = withContext(bgThread) { repository.getData().await().toString() }
             } catch (err : Exception) {
 //                Log.d(this::class.java.simpleName, err.localizedMessage)
                 error.value = true

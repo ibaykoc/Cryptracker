@@ -7,5 +7,5 @@ import qblmchmmd.com.cryptracker.datasource.remote.RemoteData
 interface Repository<T> {
     val remoteData : RemoteData<T>
     val localData : LocalData<T>
-    suspend fun getData() : T?
+    suspend fun getData() : Deferred<T>
 }

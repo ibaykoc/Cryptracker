@@ -1,5 +1,8 @@
 package qblmchmmd.com.cryptracker.mock
 
+import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.delay
 import qblmchmmd.com.cryptracker.datasource.local.LocalData
 import qblmchmmd.com.cryptracker.repository.Repository
@@ -13,12 +16,12 @@ class RepositoryMock<T>(private val getDataReturn: T,
 
     var getDataCalled = false
 
-    override suspend fun getData(): T? {
+    override suspend fun getData(): Deferred<T> {
         getDataCalled = true
         delay(100)
         throwException?.let {
             throw  it
         }
-        return getDataReturn
+        return GlobalScope.async { getDataReturn }
     }
 }

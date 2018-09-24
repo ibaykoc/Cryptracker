@@ -10,7 +10,7 @@ import java.net.URL
 class CoinMarketCapAPI : RemoteData<CryptoListResponse> {
     override suspend fun fetchData() : Deferred<CryptoListResponse> {
         return GlobalScope.async(Dispatchers.Default, CoroutineStart.DEFAULT, null, {
-            val url = URL("https://pro-api.coinmarketca.com/v1/cryptocurrency/listings/latest?start=1&limit=10&convert=USD")
+            val url = URL("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=10&convert=USD")
             with(url.openConnection() as HttpURLConnection) {
                 setRequestProperty("X-CMC_PRO_API_KEY", "94d26260-8b2a-48a4-b889-57e2a85657a9")
                 requestMethod = "GET"

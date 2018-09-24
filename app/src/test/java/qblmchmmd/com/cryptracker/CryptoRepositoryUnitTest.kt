@@ -1,7 +1,9 @@
 package qblmchmmd.com.cryptracker
 
 import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Assert
 import org.junit.Test
 import qblmchmmd.com.cryptracker.mock.LocalDataMock
@@ -19,11 +21,11 @@ class CryptoRepositoryUnitTest {
         val localData = LocalDataMock<CryptoListResponse>()
         val cryptoRepo = CryptoRepository(remoteData = remoteData, localData = localData)
 
-        GlobalScope.launch {
+        runBlocking {
             cryptoRepo.getData()
+            delay(1000)
         }
 
         Assert.assertEquals(remoteData.fetchDataCalled, true)
     }
-
 }
