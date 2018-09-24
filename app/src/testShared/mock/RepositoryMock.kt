@@ -1,4 +1,4 @@
-package qblmchmmd.com.cryptracker.mock
+package mock
 
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.GlobalScope

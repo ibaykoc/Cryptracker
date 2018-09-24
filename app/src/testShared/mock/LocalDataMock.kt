@@ -1,4 +1,4 @@
-package qblmchmmd.com.cryptracker.mock
+package mock
 
 import qblmchmmd.com.cryptracker.datasource.local.LocalData
 

@@ -1,14 +1,12 @@
 package qblmchmmd.com.cryptracker
 
-import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Assert
 import org.junit.Test
-import qblmchmmd.com.cryptracker.mock.LocalDataMock
-import qblmchmmd.com.cryptracker.mock.RemoteDataMock
-import qblmchmmd.com.cryptracker.mock.mockDataNull
+import mock.LocalDataMock
+import mock.RemoteDataMock
+import mock.mockDataNull
 import qblmchmmd.com.cryptracker.model.CryptoListResponse
 import qblmchmmd.com.cryptracker.repository.CryptoRepository
 

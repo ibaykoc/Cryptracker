@@ -10,8 +10,8 @@ import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
-import qblmchmmd.com.cryptracker.mock.RepositoryMock
-import qblmchmmd.com.cryptracker.mock.mockDataNull
+import mock.RepositoryMock
+import mock.mockDataNull
 import qblmchmmd.com.cryptracker.viewmodel.MainViewModel
 import java.io.IOException
 
@@ -92,7 +92,7 @@ class MainViewModelUnitTest {
             viewModel.update()
             delay(1000)
         }
-        assertEquals(expectedData.toString(), LiveDataTestUtil.getValue(viewModel.uiData))
+        assertEquals(expectedData, LiveDataTestUtil.getValue(viewModel.uiData))
     }
 
     @Test
