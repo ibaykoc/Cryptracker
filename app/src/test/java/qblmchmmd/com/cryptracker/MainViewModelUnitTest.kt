@@ -4,14 +4,18 @@ package qblmchmmd.com.cryptracker
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
 import com.koc.countrinfo.util.LiveDataTestUtil
-import kotlinx.coroutines.experimental.Dispatchers
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.runBlocking
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
+import kotlinx.coroutines.experimental.*
+import mock.RepositoryMock
+import mock.mockData
+import mock.mockDataNull
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
-import mock.RepositoryMock
-import mock.mockDataNull
+import qblmchmmd.com.cryptracker.model.CryptoListResponse
+import qblmchmmd.com.cryptracker.repository.Repository
 import qblmchmmd.com.cryptracker.viewmodel.MainViewModel
 import java.io.IOException
 
@@ -19,7 +23,7 @@ class MainViewModelUnitTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    val repository = RepositoryMock(mockDataNull)
+    val repository = mockk<Repository<CryptoListResponse>>()
 
     val viewModel = MainViewModel(
             repository = repository,
@@ -28,85 +32,98 @@ class MainViewModelUnitTest {
 
     @Test
     fun whenUpdate_isLoadingIsTrue() {
+        // Given
+        coEvery { repository.getData() } returns GlobalScope.async {
+            delay(100)
+            mockData
+        }
+
+        // When
         viewModel.update()
 
+        // Then
         assertEquals(true, LiveDataTestUtil.getValue(viewModel.isLoading))
     }
 
     @Test
     fun whenUpdate_repositoryCalled() {
-        val repository = RepositoryMock(mockDataNull)
-        val viewModel = MainViewModel(
-                repository = repository,
-                mainThread = Dispatchers.Unconfined,
-                bgThread = Dispatchers.Unconfined)
+        // Given
+        coEvery { repository.getData() } returns GlobalScope.async {
+            mockData
+        }
+
+        // When
         viewModel.update()
 
-        assertEquals(true, repository.getDataCalled)
+        // Then
+        coVerify { repository.getData() }
     }
 
     @Test
     fun whenUpdate_repositoryComplete_isLoadingIsFalse() {
-        val repository = RepositoryMock(mockDataNull)
-        val viewModel = MainViewModel(
-                repository = repository,
-                mainThread = Dispatchers.Unconfined,
-                bgThread = Dispatchers.Unconfined)
-
-        runBlocking {
-            viewModel.update()
-            delay(1000)
+        // Given
+        coEvery { repository.getData() } returns GlobalScope.async {
+            delay(10)
+            mockData
         }
 
+        // When
+        runBlocking {
+            viewModel.update()
+            delay(11)
+        }
+
+        //Then
         assertEquals(false, LiveDataTestUtil.getValue(viewModel.isLoading))
     }
 
     @Test
     fun whenUpdate_repositoryError_isLoadingIsFalse() {
-        val repository = RepositoryMock(
-                getDataReturn = mockDataNull,
-                throwException = IOException("error"))
-        val viewModel = MainViewModel(
-                repository = repository,
-                mainThread = Dispatchers.Unconfined,
-                bgThread = Dispatchers.Unconfined)
+        // Given
+        coEvery { repository.getData() } returns GlobalScope.async {
+            throw IOException()
+        }
 
+        // When
         runBlocking {
             viewModel.update()
-            delay(1000)
+            delay(1)
         }
+
+        // Then
         assertEquals(false, LiveDataTestUtil.getValue(viewModel.isLoading))
     }
 
     @Test
     fun whenUpdateRepositoryComplete_dataUpdated() {
+        // Given
         val expectedData = mockDataNull
-
-        val repository = RepositoryMock(getDataReturn = expectedData)
-        val viewModel = MainViewModel(
-                repository = repository,
-                mainThread = Dispatchers.Unconfined,
-                bgThread = Dispatchers.Unconfined)
+        coEvery { repository.getData() } returns GlobalScope.async {
+            expectedData
+        }
 
         runBlocking {
             viewModel.update()
-            delay(1000)
+            delay(1)
         }
+
         assertEquals(expectedData, LiveDataTestUtil.getValue(viewModel.uiData))
     }
 
     @Test
     fun whenUpdateRepositoryError_isErrorIsTrue() {
-        val repository = RepositoryMock(getDataReturn = mockDataNull, throwException = IOException("error"))
-        val viewModel = MainViewModel(
-                repository = repository,
-                mainThread = Dispatchers.Unconfined,
-                bgThread = Dispatchers.Unconfined)
+        // Given
+        coEvery { repository.getData() } returns GlobalScope.async {
+            throw IOException()
+        }
 
+        // When
         runBlocking {
             viewModel.update()
-            delay(1000)
+            delay(1)
         }
+
+        // Then
         assertEquals(true, LiveDataTestUtil.getValue(viewModel.isError))
     }
 }
