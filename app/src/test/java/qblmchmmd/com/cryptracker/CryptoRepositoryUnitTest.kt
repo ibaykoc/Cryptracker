@@ -5,14 +5,9 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
-import org.junit.Assert
 import org.junit.Test
-import mock.LocalDataMock
-import mock.RemoteDataMock
 import mock.mockData
-import mock.mockDataNull
 import qblmchmmd.com.cryptracker.datasource.local.LocalData
 import qblmchmmd.com.cryptracker.datasource.remote.RemoteData
 import qblmchmmd.com.cryptracker.model.CryptoListResponse

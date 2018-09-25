@@ -8,7 +8,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.experimental.*
-import mock.RepositoryMock
 import mock.mockData
 import mock.mockDataNull
 import org.junit.Assert.assertEquals

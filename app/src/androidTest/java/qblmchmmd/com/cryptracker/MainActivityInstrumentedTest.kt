@@ -4,9 +4,9 @@ import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
 import android.view.View
 import com.agoda.kakao.*
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.runBlocking
-import mock.RepositoryMock
+import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.async
 import mock.mockData
 import org.hamcrest.Matcher
 import org.junit.Rule
@@ -15,6 +15,10 @@ import org.junit.runner.RunWith
 import org.koin.android.viewmodel.ext.koin.viewModel
 import org.koin.dsl.module.module
 import org.koin.standalone.StandAloneContext.loadKoinModules
+import qblmchmmd.com.cryptracker.datasource.local.CryptoDB
+import qblmchmmd.com.cryptracker.datasource.remote.RemoteData
+import qblmchmmd.com.cryptracker.model.CryptoListResponse
+import qblmchmmd.com.cryptracker.repository.CryptoRepository
 import qblmchmmd.com.cryptracker.view.MainActivity
 import qblmchmmd.com.cryptracker.viewmodel.MainViewModel
 
@@ -32,12 +36,22 @@ class MainScreen : Screen<MainScreen>() {
     }
 }
 
+class RemoteDataMock : RemoteData<CryptoListResponse> {
+    override suspend fun fetchData(): Deferred<CryptoListResponse> {
+        return GlobalScope.async { mockData }
+    }
+
+}
+
 @RunWith(AndroidJUnit4::class)
 class MainActivityInstrumentedTest {
 
     private val viewModelMockModule = module {
+
+        val repositoryMock = CryptoRepository(RemoteDataMock(), CryptoDB())
+
         viewModel(override = true) {
-            MainViewModel(RepositoryMock(getDataReturn = mockData),
+            MainViewModel(repositoryMock,
                     mainThread = get(name = "mainThread"),
                     bgThread = get(name = "bgThread"))
         }
@@ -56,9 +70,6 @@ class MainActivityInstrumentedTest {
 
     @Test
     fun whenDataReceived_ShowData() {
-        runBlocking {
-            delay(1000)
-        }
         mainScreen {
             cryptoList {
                 firstChild<MainScreen.CryptoListItem> {
@@ -77,9 +88,6 @@ class MainActivityInstrumentedTest {
 
     @Test
     fun whenDataShown_swipeRefreshNotRefreshing() {
-        runBlocking {
-            delay(1000)
-        }
         mainScreen {
             cryptoList {
                 firstChild<MainScreen.CryptoListItem> {
