@@ -69,7 +69,7 @@ class MainViewModelUnitTest {
         // When
         runBlocking {
             viewModel.update()
-            delay(11)
+            delay(15)
         }
 
         //Then
@@ -86,7 +86,7 @@ class MainViewModelUnitTest {
         // When
         runBlocking {
             viewModel.update()
-            delay(1)
+            delay(5)
         }
 
         // Then
@@ -103,7 +103,7 @@ class MainViewModelUnitTest {
 
         runBlocking {
             viewModel.update()
-            delay(1)
+            delay(5)
         }
 
         assertEquals(expectedData, LiveDataTestUtil.getValue(viewModel.uiData))
@@ -119,7 +119,7 @@ class MainViewModelUnitTest {
         // When
         runBlocking {
             viewModel.update()
-            delay(1)
+            delay(5)
         }
 
         // Then

@@ -26,12 +26,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         viewModel.uiData.observe(this, Observer {
-            Log.d(tag, "uiData $it")
             updateUi(it!!)
         })
 
         viewModel.isLoading.observe(this, Observer {
-            Log.d(tag, "isLoading $it")
             it?.let {
                 main_refresh.isRefreshing = it
             }

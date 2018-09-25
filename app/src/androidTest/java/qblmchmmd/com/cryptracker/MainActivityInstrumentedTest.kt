@@ -4,9 +4,7 @@ import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
 import android.view.View
 import com.agoda.kakao.*
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.*
 import mock.mockData
 import org.hamcrest.Matcher
 import org.junit.Rule
@@ -38,7 +36,10 @@ class MainScreen : Screen<MainScreen>() {
 
 class RemoteDataMock : RemoteData<CryptoListResponse> {
     override suspend fun fetchData(): Deferred<CryptoListResponse> {
-        return GlobalScope.async { mockData }
+        return GlobalScope.async {
+            delay(1000)
+            mockData
+        }
     }
 
 }
@@ -69,7 +70,16 @@ class MainActivityInstrumentedTest {
     private val mainScreen = MainScreen()
 
     @Test
+    fun whenStart_showLoading() {
+        runBlocking { 10 }
+        mainScreen {
+            swipeRefresh { isRefreshing() }
+        }
+    }
+
+    @Test
     fun whenDataReceived_ShowData() {
+        runBlocking { delay(1001) }
         mainScreen {
             cryptoList {
                 firstChild<MainScreen.CryptoListItem> {
@@ -87,7 +97,8 @@ class MainActivityInstrumentedTest {
     }
 
     @Test
-    fun whenDataShown_swipeRefreshNotRefreshing() {
+    fun whenDataShown_hideLoading() {
+        runBlocking { delay(1001) }
         mainScreen {
             cryptoList {
                 firstChild<MainScreen.CryptoListItem> {

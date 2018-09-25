@@ -13,7 +13,7 @@ class CryptoRepository(override val remoteData: RemoteData<CryptoListResponse>, 
         try {
             remoteData.fetchData().await()
         } catch (err : Exception) {
-            Log.d(this::class.java.simpleName, err.localizedMessage)
+//            Log.d(this::class.java.simpleName, err.localizedMessage)
             throw err
         }
     }
