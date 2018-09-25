@@ -109,4 +109,26 @@ class MainViewModelUnitTest {
         }
         assertEquals(true, LiveDataTestUtil.getValue(viewModel.isError))
     }
+
+    @Test
+    fun whenUpdate_repositoryError_localCalled() {
+        val local = RepositoryMock(getDataReturn = mockDataNull, throwException = IOException("error"))
+        val viewModel = MainViewModel(
+                repository = repository,
+                mainThread = Dispatchers.Unconfined,
+                bgThread = Dispatchers.Unconfined)
+        viewModel.update()
+
+        assertEquals(true, repository.getLocalCalled)
+    }
+
+    @Test
+    fun whenUpdateRepositoryError_localCalled_dbUpdated() {
+
+    }
+
+    @Test
+    fun whenNoConnection_localNotEmpty_localCalled() {
+
+    }
 }

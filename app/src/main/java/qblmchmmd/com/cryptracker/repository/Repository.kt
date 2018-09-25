@@ -8,4 +8,6 @@ interface Repository<T> {
     val remoteData : RemoteData<T>
     val localData : LocalData<T>
     suspend fun getData() : Deferred<T>
+    suspend fun getLocal() : Deferred<T>
+
 }

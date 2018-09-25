@@ -15,6 +15,8 @@ class RepositoryMock<T>(private val getDataReturn: T,
     : Repository<T> {
 
     var getDataCalled = false
+    var getLocalCalled = false
+    var getLocalUpdated = false
 
     override suspend fun getData(): Deferred<T> {
         getDataCalled = true
@@ -23,5 +25,13 @@ class RepositoryMock<T>(private val getDataReturn: T,
             throw  it
         }
         return GlobalScope.async { getDataReturn }
+    }
+
+    override suspend fun getLocal(): Deferred<T> {
+        getLocalCalled = true
+    }
+
+    override suspend fun updateLocal(): Deferred<T> {
+        getLocalUpdated = true
     }
 }

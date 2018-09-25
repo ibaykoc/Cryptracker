@@ -17,4 +17,16 @@ class CryptoRepository(override val remoteData: RemoteData<CryptoListResponse>, 
             throw err
         }
     }
+
+
+
+    override suspend fun getLocal(): Deferred<CryptoListResponse> = GlobalScope.async {
+        try {
+
+            remoteData.fetchData().await()
+        } catch (err : Exception) {
+            Log.d(this::class.java.simpleName, err.localizedMessage)
+            throw err
+        }
+    }
 }

@@ -14,7 +14,6 @@ class CryptoRepositoryUnitTest {
 
     @Test
     fun whenGetData_remoteFetchDataCalled() {
-
         val remoteData = RemoteDataMock(mockDataNull)
         val localData = LocalDataMock<CryptoListResponse>()
         val cryptoRepo = CryptoRepository(remoteData = remoteData, localData = localData)
@@ -25,5 +24,19 @@ class CryptoRepositoryUnitTest {
         }
 
         Assert.assertEquals(remoteData.fetchDataCalled, true)
+    }
+
+    @Test
+    fun whenRemoteFetchDataCalled_dbUpdated() {
+        val remoteData = RemoteDataMock(mockDataNull)
+        val localData = LocalDataMock<CryptoListResponse>()
+        val cryptoRepo = CryptoRepository(remoteData = remoteData, localData = localData)
+
+        runBlocking {
+            cryptoRepo.getData()
+            delay(1000)
+        }
+
+        Assert.assertEquals(localData.localDataUpdated, true)
     }
 }
