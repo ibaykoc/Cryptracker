@@ -15,6 +15,7 @@ import org.koin.android.viewmodel.ext.android.viewModel
 import qblmchmmd.com.cryptracker.R
 import qblmchmmd.com.cryptracker.model.CryptoListResponse
 import qblmchmmd.com.cryptracker.viewmodel.MainViewModel
+import qblmchmmd.com.cryptracker.viewmodel.MainViewState
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,22 +26,24 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        viewModel.uiData.observe(this, Observer {
-            updateUi(it!!)
-        })
+        viewModel.viewState.observe(this, Observer { viewState ->
+            viewState?.let {
+                when(viewState) {
+                    is MainViewState.Loading -> {
+                        main_refresh.isRefreshing = viewState.isLoading
+                    }
 
-        viewModel.isLoading.observe(this, Observer {
-            it?.let {
-                main_refresh.isRefreshing = it
+                    is MainViewState.Error -> {
+                        Log.d(tag, "Error: ${viewState.errorMessage}")
+                    }
+                    is MainViewState.Data -> {
+                        updateUi(viewState.data)
+                    }
+                }
             }
         })
-
-        viewModel.isError.observe(this, Observer {
-            Log.d(tag, "isError $it")
-        })
-
-        viewModel.update()
         setupUi()
+        viewModel.update()
     }
 
     private fun setupUi() {

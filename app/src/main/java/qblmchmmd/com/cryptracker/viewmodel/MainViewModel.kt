@@ -4,44 +4,33 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModel
-import android.util.Log
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.withContext
-import qblmchmmd.com.cryptracker.repository.Repository
 import qblmchmmd.com.cryptracker.model.CryptoListResponse
-import java.io.IOException
+import qblmchmmd.com.cryptracker.repository.Repository
 import kotlin.coroutines.experimental.CoroutineContext
 
 class MainViewModel(private val repository: Repository<CryptoListResponse>,
-                    private val mainThread : CoroutineContext,
-                    private val bgThread : CoroutineContext):ViewModel() {
+                    private val mainThread: CoroutineContext,
+                    private val bgThread: CoroutineContext) : ViewModel() {
 
-    private val data = MutableLiveData<CryptoListResponse>()
-    val uiData : LiveData<CryptoListResponse> = Transformations.map(data) {
-        it
-    }
-
-    private val loading = MutableLiveData<Boolean>()
-    val isLoading : LiveData<Boolean> = Transformations.map(loading) {
-        it
-    }
-
-    private val error = MutableLiveData<Boolean>()
-    val isError : LiveData<Boolean> = Transformations.map(error) {
-        it
+    private val state = MutableLiveData<MainViewState>()
+    val viewState: LiveData<MainViewState> = Transformations.map(state) {
+        state.value
     }
 
     fun update() {
-        GlobalScope.launch(mainThread){
-            loading.value = true
-            try {
-                data.value = withContext(bgThread) { repository.getData().await() }
-            } catch (err : Exception) {
-//                Log.d(this::class.java.simpleName, err.localizedMessage)
-                error.value = true
+        GlobalScope.launch(mainThread) {
+            state.value = MainViewState.Loading(true)
+            state.value = try {
+                MainViewState.Data(
+                        withContext(bgThread) { repository.getData().await() }
+                )
+            } catch (err: Exception) {
+                MainViewState.Error(err.localizedMessage)
             }
-            loading.value = false
+            state.value = MainViewState.Loading(false)
         }
     }
 
