@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModel
+import android.util.Log
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.withContext
@@ -11,26 +12,34 @@ import qblmchmmd.com.cryptracker.model.CryptoListResponse
 import qblmchmmd.com.cryptracker.repository.Repository
 import kotlin.coroutines.experimental.CoroutineContext
 
-class MainViewModel(private val repository: Repository<CryptoListResponse>,
-                    private val mainThread: CoroutineContext,
-                    private val bgThread: CoroutineContext) : ViewModel() {
+class MainViewModel(val repository: Repository<CryptoListResponse>,
+                    val mainThread: CoroutineContext,
+                    val bgThread: CoroutineContext) : ViewModel() {
 
-    private val state = MutableLiveData<MainViewState>()
-    val viewState: LiveData<MainViewState> = Transformations.map(state) {
-        state.value
+    private val loading = MutableLiveData<Boolean>()
+    val loadingState = loading as LiveData<Boolean>
+
+    private val error = MutableLiveData<Exception>()
+    val errorState = error as LiveData<Exception>
+
+    private val data = MutableLiveData<CryptoListResponse>()
+    val dataState = data as LiveData<CryptoListResponse>
+
+    init {
+        Log.d(this::class.java.simpleName, "init")
+        update()
     }
 
     fun update() {
+        Log.d(this::class.java.simpleName, "Update")
         GlobalScope.launch(mainThread) {
-            state.value = MainViewState.Loading(true)
-            state.value = try {
-                MainViewState.Data(
-                        withContext(bgThread) { repository.getData().await() }
-                )
+            loading.value = true
+            try {
+                data.value = withContext(bgThread) { repository.getData().await()  }
             } catch (err: Exception) {
-                MainViewState.Error(err.localizedMessage)
+                error.value = err
             }
-            state.value = MainViewState.Loading(false)
+            loading.value =false
         }
     }
 

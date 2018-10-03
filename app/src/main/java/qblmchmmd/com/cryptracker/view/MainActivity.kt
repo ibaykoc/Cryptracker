@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.crypto_list_item.view.*
+import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
 import qblmchmmd.com.cryptracker.R
 import qblmchmmd.com.cryptracker.model.CryptoListResponse
@@ -19,46 +20,30 @@ import qblmchmmd.com.cryptracker.viewmodel.MainViewState
 
 class MainActivity : AppCompatActivity() {
 
-    private val tag = this::class.java.simpleName
-
     private val viewModel: MainViewModel by viewModel()
+
+    lateinit var eventHandler : MainEventHandler
+
+    lateinit var presenter: MainPresenter
+
+    val cryptoListAdapter = CryptoListAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        viewModel.viewState.observe(this, Observer { viewState ->
-            viewState?.let {
-                when(viewState) {
-                    is MainViewState.Loading -> {
-                        main_refresh.isRefreshing = viewState.isLoading
-                    }
 
-                    is MainViewState.Error -> {
-                        Log.d(tag, "Error: ${viewState.errorMessage}")
-                    }
-                    is MainViewState.Data -> {
-                        updateUi(viewState.data)
-                    }
-                }
-            }
-        })
-        setupUi()
-        viewModel.update()
-    }
+        eventHandler = MainEventHandler(viewModel)
+        presenter = MainPresenter(viewModel, this)
 
-    private fun setupUi() {
-        main_refresh.setOnRefreshListener {
-            viewModel.update()
-        }
-        crypto_list.adapter = CryptoListAdapter()
+        main_refresh.setOnRefreshListener { eventHandler.onRefresh() }
+
+        eventHandler.onCreate()
+
+        crypto_list.adapter = cryptoListAdapter
         crypto_list.layoutManager = LinearLayoutManager(
                 this,
                 LinearLayoutManager.VERTICAL,
                 false)
-    }
-
-    private fun updateUi(newData: CryptoListResponse) {
-        (crypto_list.adapter as CryptoListAdapter).updateData(newData.data as List<CryptoListResponse.Data>)
     }
 
     inner class CryptoListAdapter : RecyclerView.Adapter<CryptoListAdapter.ViewHolder>() {

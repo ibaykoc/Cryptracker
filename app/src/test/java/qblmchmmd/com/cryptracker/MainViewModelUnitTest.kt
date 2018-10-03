@@ -4,12 +4,10 @@ package qblmchmmd.com.cryptracker
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
 import android.arch.lifecycle.Observer
-import com.koc.countrinfo.util.LiveDataTestUtil
 import io.mockk.*
 import kotlinx.coroutines.experimental.*
 import mock.mockData
 import mock.mockDataNull
-import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import qblmchmmd.com.cryptracker.model.CryptoListResponse
