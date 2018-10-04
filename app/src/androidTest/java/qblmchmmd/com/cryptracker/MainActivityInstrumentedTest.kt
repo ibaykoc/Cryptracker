@@ -8,6 +8,7 @@ import android.view.View
 import com.agoda.kakao.*
 import kotlinx.coroutines.experimental.*
 import mock.mockData
+import mock.mockValidData
 import org.hamcrest.Matcher
 import org.junit.Rule
 import org.junit.Test
@@ -80,7 +81,7 @@ class MainActivityInstrumentedTest {
                     }
 
                 })
-
+        repositoryMock.localData.insertAll(mockValidData)
         viewModel(override = true) {
             MainViewModel(repositoryMock,
                     mainThread = get(name = "mainThread"),
@@ -101,7 +102,6 @@ class MainActivityInstrumentedTest {
 
     @Test
     fun whenStart_showLoading() {
-        runBlocking { 10 }
         mainScreen {
             swipeRefresh { isRefreshing() }
         }
@@ -109,18 +109,17 @@ class MainActivityInstrumentedTest {
 
     @Test
     fun whenDataReceived_ShowData() {
-        runBlocking { delay(1001) }
         mainScreen {
             cryptoList {
                 firstChild<MainScreen.CryptoListItem> {
                     isVisible()
-                    cryptoName { hasText("Bitcoco") }
-                    cryptoPrice { hasText("$8000.0") }
+                    cryptoName { hasText("But") }
+                    cryptoPrice { hasText("$2.0") }
                 }
                 childAt<MainScreen.CryptoListItem>(position = 1) {
                     isVisible()
-                    cryptoName { hasText("Bitcoca") }
-                    cryptoPrice { hasText("$9000.0") }
+                    cryptoName { hasText("Bit") }
+                    cryptoPrice { hasText("$1.0") }
                 }
             }
         }
@@ -128,19 +127,9 @@ class MainActivityInstrumentedTest {
 
     @Test
     fun whenDataShown_hideLoading() {
-        runBlocking { delay(1001) }
+        runBlocking { delay(1000) }
         mainScreen {
-            cryptoList {
-                firstChild<MainScreen.CryptoListItem> {
-                    isVisible()
-                    cryptoName { hasText("Bitcoco") }
-                }
-                childAt<MainScreen.CryptoListItem>(position = 1) {
-                    isVisible()
-                    cryptoName { hasText("Bitcoca") }
-                    swipeRefresh { isNotRefreshing() }
-                }
-            }
+            swipeRefresh { isNotRefreshing() }
         }
     }
 }

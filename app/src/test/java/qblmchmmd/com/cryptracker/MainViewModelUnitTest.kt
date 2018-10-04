@@ -3,15 +3,22 @@
 package qblmchmmd.com.cryptracker
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
+import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
+import android.arch.paging.LivePagedListBuilder
+import android.arch.paging.PagedList
 import io.mockk.*
-import kotlinx.coroutines.experimental.*
-import mock.mockData
-import mock.mockDataNull
+import kotlinx.coroutines.experimental.Dispatchers
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.runBlocking
+import mock.mockValidData
 import org.junit.Rule
 import org.junit.Test
 import qblmchmmd.com.cryptracker.model.CryptoListResponse
+import qblmchmmd.com.cryptracker.model.CryptoUiModel
+import qblmchmmd.com.cryptracker.repository.CryptoListRepository
 import qblmchmmd.com.cryptracker.repository.Repository
+import qblmchmmd.com.cryptracker.repository.RepositoryState
 import qblmchmmd.com.cryptracker.viewmodel.MainViewModel
 import java.io.IOException
 
@@ -19,7 +26,7 @@ class MainViewModelUnitTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    val repository = mockk<Repository<CryptoListResponse>>()
+    val repository = mockk<Repository<List<CryptoUiModel>, CryptoListResponse>>()
 
     val viewModel = MainViewModel(
             repository = repository,
@@ -29,10 +36,13 @@ class MainViewModelUnitTest {
     @Test
     fun whenUpdate_loadingStateTrue() {
         // Given
-        coEvery { repository.getData() } returns GlobalScope.async {
-            delay(100)
-            mockData
-        }
+        every { repository.getData() } returns
+            RepositoryState(
+                    loading = MutableLiveData<Boolean>().also { it.value = true },
+                    error = MutableLiveData<Exception>().also { it.value = null },
+                    pagedListBuilder = LivePagedListBuilder(mockk(), 10)
+            )
+
         val obs = spyk(Observer<Boolean> {})
         viewModel.loadingState.observeForever(obs)
 
@@ -46,9 +56,12 @@ class MainViewModelUnitTest {
     @Test
     fun whenUpdate_repositoryCalled() {
         // Given
-        coEvery { repository.getData() } returns GlobalScope.async {
-            mockData
-        }
+        every { repository.getData() } returns
+                RepositoryState(
+                        MutableLiveData<Boolean>().also { it.value = true },
+                        MutableLiveData<Exception>().also { it.value = null },
+                        LivePagedListBuilder(mockk(), 10)
+                )
 
         // When
         viewModel.update()
@@ -60,9 +73,12 @@ class MainViewModelUnitTest {
     @Test
     fun whenUpdate_repositoryError_loadingStateFalse() {
         // Given
-        coEvery { repository.getData() } returns GlobalScope.async {
-            throw IOException("Error test")
-        }
+        every { repository.getData() } returns
+                RepositoryState(
+                        MutableLiveData<Boolean>().also { it.value = true },
+                        MutableLiveData<Exception>().also { it.value = null },
+                        LivePagedListBuilder(mockk(), 10)
+                )
 
         val obs = spyk(Observer<Boolean> {})
 
@@ -81,11 +97,15 @@ class MainViewModelUnitTest {
     @Test
     fun whenUpdateRepositoryComplete_dataUpdated() {
         // Given
-        val expectedData = mockDataNull
-        coEvery { repository.getData() } returns GlobalScope.async {
-            expectedData
-        }
-        val obs = spyk(Observer<CryptoListResponse> {})
+        val expectedData = mockValidData as PagedList<CryptoUiModel>
+        every { repository.getData() } returns
+                RepositoryState(
+                        MutableLiveData<Boolean>().also { it.value = true },
+                        MutableLiveData<Exception>().also { it.value = null },
+                        LivePagedListBuilder(mockk(), 10)
+                )
+
+        val obs = spyk(Observer<PagedList<CryptoUiModel>> {})
         viewModel.dataState.observeForever(obs)
 
         runBlocking {
@@ -100,9 +120,12 @@ class MainViewModelUnitTest {
     fun whenUpdateRepositoryError_errorStateIsNotNull() {
         // Given
         val exception = IOException("Error Test")
-        coEvery { repository.getData() } returns GlobalScope.async {
-            throw exception
-        }
+        every { repository.getData() } returns
+                RepositoryState(
+                        MutableLiveData<Boolean>().also { it.value = true },
+                        MutableLiveData<Exception>().also { it.value = null },
+                        LivePagedListBuilder(mockk(), 10)
+                )
         val obs = spyk(Observer<Exception> {})
         viewModel.errorState.observeForever(obs)
 
