@@ -13,7 +13,6 @@ import org.junit.Test
 import qblmchmmd.com.cryptracker.model.CryptoListResponse
 import qblmchmmd.com.cryptracker.repository.Repository
 import qblmchmmd.com.cryptracker.viewmodel.MainViewModel
-import qblmchmmd.com.cryptracker.viewmodel.MainViewState
 import java.io.IOException
 
 class MainViewModelUnitTest {
@@ -28,20 +27,20 @@ class MainViewModelUnitTest {
             bgThread = Dispatchers.Unconfined)
 
     @Test
-    fun whenUpdate_viewStateLoadingTrue() {
+    fun whenUpdate_loadingStateTrue() {
         // Given
         coEvery { repository.getData() } returns GlobalScope.async {
             delay(100)
             mockData
         }
-        val obs = spyk(Observer<MainViewState> {})
-        viewModel.viewState.observeForever(obs)
+        val obs = spyk(Observer<Boolean> {})
+        viewModel.loadingState.observeForever(obs)
 
         // When
         viewModel.update()
 
         // Then
-        verify(exactly = 1) { obs.onChanged(MainViewState.Loading(true)) }
+        verify(exactly = 1) { obs.onChanged(true) }
     }
 
     @Test
@@ -59,15 +58,15 @@ class MainViewModelUnitTest {
     }
 
     @Test
-    fun whenUpdate_repositoryError_viewStateLoadingFalse() {
+    fun whenUpdate_repositoryError_loadingStateFalse() {
         // Given
         coEvery { repository.getData() } returns GlobalScope.async {
             throw IOException("Error test")
         }
 
-        val obs = spyk(Observer<MainViewState> {})
+        val obs = spyk(Observer<Boolean> {})
 
-        viewModel.viewState.observeForever(obs)
+        viewModel.loadingState.observeForever(obs)
 
         // When
         runBlocking {
@@ -76,7 +75,7 @@ class MainViewModelUnitTest {
         }
 
         // Then
-        verify(exactly = 1) { obs.onChanged(MainViewState.Loading(false)) }
+        verify(exactly = 1) { obs.onChanged(false) }
     }
 
     @Test
@@ -86,25 +85,26 @@ class MainViewModelUnitTest {
         coEvery { repository.getData() } returns GlobalScope.async {
             expectedData
         }
-        val obs = spyk(Observer<MainViewState> {})
-        viewModel.viewState.observeForever(obs)
+        val obs = spyk(Observer<CryptoListResponse> {})
+        viewModel.dataState.observeForever(obs)
 
         runBlocking {
             viewModel.update()
             delay(5)
         }
 
-        verify(exactly = 1) { obs.onChanged(MainViewState.Data(expectedData)) }
+        verify(exactly = 1) { obs.onChanged(expectedData) }
     }
 
     @Test
-    fun whenUpdateRepositoryError_isErrorIsTrue() {
+    fun whenUpdateRepositoryError_errorStateIsNotNull() {
         // Given
+        val exception = IOException("Error Test")
         coEvery { repository.getData() } returns GlobalScope.async {
-            throw IOException("Error Test")
+            throw exception
         }
-        val obs = spyk(Observer<MainViewState> {})
-        viewModel.viewState.observeForever(obs)
+        val obs = spyk(Observer<Exception> {})
+        viewModel.errorState.observeForever(obs)
 
         // When
         runBlocking {
@@ -113,6 +113,6 @@ class MainViewModelUnitTest {
         }
 
         // Then
-        verify(exactly = 1) { obs.onChanged(MainViewState.Error("Error Test")) }
+        verify(exactly = 1) { obs.onChanged(exception) }
     }
 }

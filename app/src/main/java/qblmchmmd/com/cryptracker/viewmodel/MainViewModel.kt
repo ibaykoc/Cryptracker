@@ -2,9 +2,7 @@ package qblmchmmd.com.cryptracker.viewmodel
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModel
-import android.util.Log
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.withContext
@@ -26,20 +24,18 @@ class MainViewModel(val repository: Repository<CryptoListResponse>,
     val dataState = data as LiveData<CryptoListResponse>
 
     init {
-        Log.d(this::class.java.simpleName, "init")
         update()
     }
 
     fun update() {
-        Log.d(this::class.java.simpleName, "Update")
         GlobalScope.launch(mainThread) {
             loading.value = true
             try {
-                data.value = withContext(bgThread) { repository.getData().await()  }
+                data.value = withContext(bgThread) { repository.getData().await() }
             } catch (err: Exception) {
                 error.value = err
             }
-            loading.value =false
+            loading.value = false
         }
     }
 
