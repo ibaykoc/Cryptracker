@@ -1,7 +1,12 @@
 package qblmchmmd.com.cryptracker.datasource.local
 
-import qblmchmmd.com.cryptracker.model.CryptoListResponse
+import android.arch.lifecycle.LiveData
+import android.arch.persistence.room.Database
+import android.arch.persistence.room.RoomDatabase
+import qblmchmmd.com.cryptracker.model.CryptoUiModel
 
-class CryptoDB : LocalData<CryptoListResponse> {
+@Database(entities = [CryptoUiModel::class], version = 1)
+abstract class CryptoDB : RoomDatabase(){
 
+    abstract fun cryptoDao() : CryptoDao
 }

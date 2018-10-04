@@ -1,4 +1,9 @@
 package qblmchmmd.com.cryptracker.datasource.local
 
-interface LocalData<T> {
+import android.arch.lifecycle.LiveData
+import android.arch.persistence.room.RoomDatabase
+
+abstract class LocalData<T>:RoomDatabase() {
+    abstract fun getAll() : LiveData<T>
+    abstract fun saveAll(item: T)
 }

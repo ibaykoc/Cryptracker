@@ -1,5 +1,7 @@
 package qblmchmmd.com.cryptracker
 
+import android.arch.persistence.room.Room
+import android.support.test.InstrumentationRegistry
 import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
 import android.view.View
@@ -14,9 +16,11 @@ import org.koin.android.viewmodel.ext.koin.viewModel
 import org.koin.dsl.module.module
 import org.koin.standalone.StandAloneContext.loadKoinModules
 import qblmchmmd.com.cryptracker.datasource.local.CryptoDB
-import qblmchmmd.com.cryptracker.datasource.remote.RemoteData
+import qblmchmmd.com.cryptracker.datasource.remote.CryptoRemoteDatasource
 import qblmchmmd.com.cryptracker.model.CryptoListResponse
-import qblmchmmd.com.cryptracker.repository.CryptoRepository
+import qblmchmmd.com.cryptracker.model.CryptoUiModel
+import qblmchmmd.com.cryptracker.repository.CryptoListRepository
+import qblmchmmd.com.cryptracker.repository.ModelTransformer
 import qblmchmmd.com.cryptracker.view.MainActivity
 import qblmchmmd.com.cryptracker.viewmodel.MainViewModel
 
@@ -34,14 +38,13 @@ class MainScreen : Screen<MainScreen>() {
     }
 }
 
-class RemoteDataMock : RemoteData<CryptoListResponse> {
-    override suspend fun fetchData(): Deferred<CryptoListResponse> {
+class CryptoRemoteDatasourceMock : CryptoRemoteDatasource {
+    override suspend fun getLatestCrypto(start: Int, limit: Int): Deferred<CryptoListResponse> {
         return GlobalScope.async {
             delay(1000)
             mockData
         }
     }
-
 }
 
 @RunWith(AndroidJUnit4::class)
@@ -49,7 +52,34 @@ class MainActivityInstrumentedTest {
 
     private val viewModelMockModule = module {
 
-        val repositoryMock = CryptoRepository(RemoteDataMock(), CryptoDB())
+        val context = InstrumentationRegistry.getTargetContext()
+        val repositoryMock = CryptoListRepository(
+                CryptoRemoteDatasourceMock(),
+                Room.inMemoryDatabaseBuilder(context, CryptoDB::class.java).build().cryptoDao(),
+                object : ModelTransformer<CryptoListResponse, List<CryptoUiModel>> {
+                    override fun transform(input: CryptoListResponse): List<CryptoUiModel> {
+                        input.data?.let { list ->
+                            return list.asSequence()
+                                    .filter { it != null }
+                                    .map { data ->
+                                        var cryptoUiModel: CryptoUiModel? = null
+                                        data!!.id?.let { cryptId ->
+                                            data.name?.let { cryptName ->
+                                                data.quote?.uSD?.price?.let { cryptPrice ->
+                                                    cryptoUiModel = CryptoUiModel(cryptId, cryptName, cryptPrice)
+                                                }
+                                            }
+                                            cryptoUiModel
+                                        }
+                                    }
+                                    .filter { transformedData -> transformedData != null }
+                                    .map { validData -> validData!! }.toList()
+
+                        }
+                        return emptyList()
+                    }
+
+                })
 
         viewModel(override = true) {
             MainViewModel(repositoryMock,
@@ -85,12 +115,12 @@ class MainActivityInstrumentedTest {
                 firstChild<MainScreen.CryptoListItem> {
                     isVisible()
                     cryptoName { hasText("Bitcoco") }
-                    cryptoPrice {hasText( "$8000.0")}
+                    cryptoPrice { hasText("$8000.0") }
                 }
                 childAt<MainScreen.CryptoListItem>(position = 1) {
                     isVisible()
-                    cryptoName {hasText("Bitcoca")}
-                    cryptoPrice {hasText( "$9000.0")}
+                    cryptoName { hasText("Bitcoca") }
+                    cryptoPrice { hasText("$9000.0") }
                 }
             }
         }
@@ -107,7 +137,7 @@ class MainActivityInstrumentedTest {
                 }
                 childAt<MainScreen.CryptoListItem>(position = 1) {
                     isVisible()
-                    cryptoName {hasText("Bitcoca")}
+                    cryptoName { hasText("Bitcoca") }
                     swipeRefresh { isNotRefreshing() }
                 }
             }
