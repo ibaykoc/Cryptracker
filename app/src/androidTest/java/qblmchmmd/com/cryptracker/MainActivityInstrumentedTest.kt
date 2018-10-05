@@ -7,8 +7,7 @@ import android.support.test.runner.AndroidJUnit4
 import android.view.View
 import com.agoda.kakao.*
 import kotlinx.coroutines.experimental.*
-import mock.mockData
-import mock.mockValidData
+import mock.MockDataFactory
 import org.hamcrest.Matcher
 import org.junit.Rule
 import org.junit.Test
@@ -16,76 +15,50 @@ import org.junit.runner.RunWith
 import org.koin.android.viewmodel.ext.koin.viewModel
 import org.koin.dsl.module.module
 import org.koin.standalone.StandAloneContext.loadKoinModules
-import qblmchmmd.com.cryptracker.datasource.local.CryptoDB
-import qblmchmmd.com.cryptracker.datasource.remote.CryptoRemoteDatasource
-import qblmchmmd.com.cryptracker.model.CryptoListResponse
-import qblmchmmd.com.cryptracker.model.CryptoUiModel
-import qblmchmmd.com.cryptracker.repository.CryptoListRepository
-import qblmchmmd.com.cryptracker.repository.ModelTransformer
+import qblmchmmd.com.cryptracker.model.datasource.local.CryptoDB
+import qblmchmmd.com.cryptracker.model.datasource.remote.CryptoRemoteDatasource
+import qblmchmmd.com.cryptracker.model.entity.CryptoListResponse
+import qblmchmmd.com.cryptracker.model.repository.CryptoListRepository
+import qblmchmmd.com.cryptracker.model.repository.CryptoModelValidator
 import qblmchmmd.com.cryptracker.view.MainActivity
 import qblmchmmd.com.cryptracker.viewmodel.MainViewModel
 
-class MainScreen : Screen<MainScreen>() {
-    val swipeRefresh = KSwipeRefreshLayout { withId(R.id.main_refresh) }
-    val cryptoList = KRecyclerView({
-        withId(R.id.crypto_list)
-    }, itemTypeBuilder = {
-        itemType(::CryptoListItem)
-    })
-
-    class CryptoListItem(parent: Matcher<View>) : KRecyclerItem<CryptoListItem>(parent) {
-        val cryptoName = KTextView(parent) { withId(R.id.crypto_list_item_name) }
-        val cryptoPrice = KTextView(parent) { withId(R.id.crypto_list_item_price) }
-    }
-}
-
-class CryptoRemoteDatasourceMock : CryptoRemoteDatasource {
-    override suspend fun getLatestCrypto(start: Int, limit: Int): Deferred<CryptoListResponse> {
-        return GlobalScope.async {
-            delay(1000)
-            mockData
-        }
-    }
-}
-
 @RunWith(AndroidJUnit4::class)
 class MainActivityInstrumentedTest {
+
+    class MainScreen : Screen<MainScreen>() {
+        val swipeRefresh = KSwipeRefreshLayout { withId(R.id.main_refresh) }
+        val cryptoList = KRecyclerView({
+            withId(R.id.crypto_list)
+        }, itemTypeBuilder = {
+            itemType(::CryptoListItem)
+        })
+
+        class CryptoListItem(parent: Matcher<View>) : KRecyclerItem<CryptoListItem>(parent) {
+            val cryptoName = KTextView(parent) { withId(R.id.crypto_list_item_name) }
+            val cryptoPrice = KTextView(parent) { withId(R.id.crypto_list_item_price) }
+        }
+    }
+
+    class CryptoRemoteDataSourceMock : CryptoRemoteDatasource {
+        override suspend fun getLatestCrypto(start: Int, limit: Int): Deferred<CryptoListResponse> {
+            return GlobalScope.async {
+                delay(1000)
+                MockDataFactory.createCryptoListResponse(101,200)
+            }
+        }
+    }
 
     private val viewModelMockModule = module {
 
         val context = InstrumentationRegistry.getTargetContext()
         val repositoryMock = CryptoListRepository(
-                CryptoRemoteDatasourceMock(),
+                CryptoRemoteDataSourceMock(),
                 Room.inMemoryDatabaseBuilder(context, CryptoDB::class.java).build().cryptoDao(),
-                object : ModelTransformer<CryptoListResponse, List<CryptoUiModel>> {
-                    override fun transform(input: CryptoListResponse): List<CryptoUiModel> {
-                        input.data?.let { list ->
-                            return list.asSequence()
-                                    .filter { it != null }
-                                    .map { data ->
-                                        var cryptoUiModel: CryptoUiModel? = null
-                                        data!!.id?.let { cryptId ->
-                                            data.name?.let { cryptName ->
-                                                data.quote?.uSD?.price?.let { cryptPrice ->
-                                                    cryptoUiModel = CryptoUiModel(cryptId, cryptName, cryptPrice)
-                                                }
-                                            }
-                                            cryptoUiModel
-                                        }
-                                    }
-                                    .filter { transformedData -> transformedData != null }
-                                    .map { validData -> validData!! }.toList()
-
-                        }
-                        return emptyList()
-                    }
-
-                })
-        repositoryMock.localData.insertAll(mockValidData)
+                CryptoModelValidator())
+        repositoryMock.localData.insertAll(MockDataFactory.createCryptoUiModel(100))
         viewModel(override = true) {
-            MainViewModel(repositoryMock,
-                    mainThread = get(name = "mainThread"),
-                    bgThread = get(name = "bgThread"))
+            MainViewModel(repositoryMock)
         }
     }
 
@@ -101,35 +74,40 @@ class MainActivityInstrumentedTest {
     private val mainScreen = MainScreen()
 
     @Test
-    fun whenStart_showLoading() {
-        mainScreen {
-            swipeRefresh { isRefreshing() }
-        }
-    }
-
-    @Test
-    fun whenDataReceived_ShowData() {
+    fun showDataOnDatabase() {
         mainScreen {
             cryptoList {
                 firstChild<MainScreen.CryptoListItem> {
                     isVisible()
-                    cryptoName { hasText("But") }
-                    cryptoPrice { hasText("$2.0") }
+                    cryptoName { hasText("crypto100") }
+                    cryptoPrice { hasText("$100.0") }
                 }
                 childAt<MainScreen.CryptoListItem>(position = 1) {
                     isVisible()
-                    cryptoName { hasText("Bit") }
-                    cryptoPrice { hasText("$1.0") }
+                    cryptoName { hasText("crypto99") }
+                    cryptoPrice { hasText("$99.0") }
                 }
             }
         }
     }
 
     @Test
-    fun whenDataShown_hideLoading() {
-        runBlocking { delay(1000) }
+    fun whenGetData_showUpdatedData() {
         mainScreen {
-            swipeRefresh { isNotRefreshing() }
+            swipeRefresh.swipeDown()
+            runBlocking { delay(2000) }
+            cryptoList {
+                firstChild<MainScreen.CryptoListItem> {
+                    isVisible()
+                    cryptoName { hasText("crypto200") }
+                    cryptoPrice { hasText("$200.0") }
+                }
+                childAt<MainScreen.CryptoListItem>(position = 1) {
+                    isVisible()
+                    cryptoName { hasText("crypto199") }
+                    cryptoPrice { hasText("$199.0") }
+                }
+            }
         }
     }
 }

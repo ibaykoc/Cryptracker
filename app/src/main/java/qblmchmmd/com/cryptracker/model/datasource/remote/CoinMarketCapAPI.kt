@@ -1,8 +1,8 @@
-package qblmchmmd.com.cryptracker.datasource.remote
+package qblmchmmd.com.cryptracker.model.datasource.remote
 
 import com.google.gson.Gson
 import kotlinx.coroutines.experimental.*
-import qblmchmmd.com.cryptracker.model.CryptoListResponse
+import qblmchmmd.com.cryptracker.model.entity.CryptoListResponse
 import java.io.BufferedReader
 import java.net.HttpURLConnection
 import java.net.URL

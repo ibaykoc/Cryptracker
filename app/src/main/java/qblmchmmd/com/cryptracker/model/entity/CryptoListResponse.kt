@@ -1,4 +1,4 @@
-package qblmchmmd.com.cryptracker.model
+package qblmchmmd.com.cryptracker.model.entity
 
 import com.google.gson.annotations.SerializedName
 

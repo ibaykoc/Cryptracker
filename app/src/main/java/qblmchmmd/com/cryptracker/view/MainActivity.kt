@@ -12,7 +12,7 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.viewmodel.ext.android.viewModel
 import qblmchmmd.com.cryptracker.R
-import qblmchmmd.com.cryptracker.model.CryptoUiModel
+import qblmchmmd.com.cryptracker.model.entity.CryptoUiModel
 import qblmchmmd.com.cryptracker.viewmodel.MainViewModel
 
 class MainActivity : AppCompatActivity() {

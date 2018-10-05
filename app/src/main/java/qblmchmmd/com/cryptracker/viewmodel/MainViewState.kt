@@ -1,6 +1,6 @@
 package qblmchmmd.com.cryptracker.viewmodel
 
-import qblmchmmd.com.cryptracker.model.CryptoListResponse
+import qblmchmmd.com.cryptracker.model.entity.CryptoListResponse
 
 
 sealed class MainViewState {

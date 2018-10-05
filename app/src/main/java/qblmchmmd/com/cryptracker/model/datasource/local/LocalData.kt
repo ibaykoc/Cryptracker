@@ -1,4 +1,4 @@
-package qblmchmmd.com.cryptracker.datasource.local
+package qblmchmmd.com.cryptracker.model.datasource.local
 
 import android.arch.lifecycle.LiveData
 import android.arch.persistence.room.RoomDatabase
