@@ -97,6 +97,7 @@ class MainActivityInstrumentedTest {
             swipeRefresh.swipeDown()
             runBlocking { delay(2000) }
             cryptoList {
+                scrollToStart()
                 firstChild<MainScreen.CryptoListItem> {
                     isVisible()
                     cryptoName { hasText("crypto200") }

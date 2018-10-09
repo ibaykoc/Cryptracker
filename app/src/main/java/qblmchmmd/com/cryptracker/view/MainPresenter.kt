@@ -16,6 +16,7 @@ class MainPresenter(private val viewModel: MainViewModel,
     override val data: MutableList<CryptoUiModel> = mutableListOf()
 
     init {
+
         viewModel.loadingState.observe(mainView, Observer { loading ->
             loading?.let {
                 mainView.main_refresh.isRefreshing = it
@@ -36,10 +37,34 @@ class MainPresenter(private val viewModel: MainViewModel,
         mainView.cryptoListAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                 super.onItemRangeInserted(positionStart, itemCount)
-                if (positionStart == 0) {
-                    mainView.crypto_list.scrollToPosition(0)
-                    //TODO: Fix weird scroll when reload on enditemloaded
-                }
+//                mainView.crypto_list.scrollToPosition(positionStart)
+                //TODO: Fix weird scroll when reload on enditemloaded
+                Log.d("DEBUK", "onItemRangeInserted(positionStart: $positionStart, itemCount: $itemCount)")
+            }
+
+            override fun onChanged() {
+                super.onChanged()
+                Log.d("DEBUK", "onChanged()")
+            }
+
+            override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+                super.onItemRangeRemoved(positionStart, itemCount)
+                Log.d("DEBUK", "onItemRangeRemoved(positionStart: $positionStart, itemCount: $itemCount)")
+            }
+
+            override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+                super.onItemRangeMoved(fromPosition, toPosition, itemCount)
+                Log.d("DEBUK", "onItemRangeMoved(fromPosition: $fromPosition, toPosition: $toPosition, itemCount: $itemCount)")
+            }
+
+            override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
+                super.onItemRangeChanged(positionStart, itemCount)
+                Log.d("DEBUK", "onItemRangeChanged(positionStart: $positionStart, itemCount: $itemCount)")
+            }
+
+            override fun onItemRangeChanged(positionStart: Int, itemCount: Int, payload: Any?) {
+                super.onItemRangeChanged(positionStart, itemCount, payload)
+                Log.d("DEBUK", "onItemRangeChanged(positionStart: $positionStart, itemCount: $itemCount, payload: $payload)")
             }
         })
     }

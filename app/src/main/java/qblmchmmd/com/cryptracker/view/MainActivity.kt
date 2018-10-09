@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            delegate.onCryptoListBindItem(holder.itemView,getItem(position), position)
+            delegate.onCryptoListBindItem(holder.itemView, getItem(position), position)
         }
 
         inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)

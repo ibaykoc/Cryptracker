@@ -25,13 +25,13 @@ val cryptrackerRepositoryModule = module {
     }
 
     single(name = "CryptoDao") {
-        Room.databaseBuilder(androidApplication(),
-                CryptoDB::class.java, "crypto.db")
-                .build().cryptoDao()
-
-//        Room.inMemoryDatabaseBuilder(androidApplication(),
-//                CryptoDB::class.java)
+//        Room.databaseBuilder(androidApplication(),
+//                CryptoDB::class.java, "crypto.db")
 //                .build().cryptoDao()
+
+        Room.inMemoryDatabaseBuilder(androidApplication(),
+                CryptoDB::class.java)
+                .build().cryptoDao()
     }
 
     single<CoroutineContext>(name = "mainThread") {
